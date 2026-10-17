@@ -112,7 +112,7 @@ pytest
 - [交互式 Dashboard](dashboard/index.html)：月度趋势、RFM、Cohort、海外市场和商品榜。
 - [数据质量审计](outputs/data_quality.json)：源规模、缺失、重复、取消行和验证结果。
 - [核心 KPI](outputs/kpis.json) 及 [全部分析明细](outputs/)：便于复核或连接 BI 工具。
-- [静态图表](reports/figures/)：适合 README、汇报或面试讲解。
+- [静态图表](reports/figures/)：7 张图已全部嵌入对应报告，并配有读图结论、业务含义与结论边界说明。
 
 ## 后续实验层
 
