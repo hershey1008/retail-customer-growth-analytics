@@ -37,7 +37,11 @@
 4. **海外收入仍是补充市场。** 非英国市场贡献 15.4% 的有效销售额；其中 Netherlands 以 £285,446 位居海外市场首位。
 5. **头部行项目需要先做商品治理。** 收入最高行项目为 `DOTCOM POSTAGE`（£206,249），但它是邮费编码而非实体商品；分析利润和备货前必须分离邮费、手工调整等服务型编码，并补充成本和库存数据。
 
-## 5. 建议与下一步
+## 5. 后续实验层
+
+项目已把建议扩展为四个可复现实验设计：Champions 保护、At Risk 分批召回、首购后 30/60/90 天运营和海外头部市场验证。使用 2011-09-10 时间切分估计自然基线、样本量与可检测提升，并生成哈希化模拟分流预览；**这些不是已执行实验或因果结果**。完整方案见 [`reports/experiment_plan.md`](experiment_plan.md)。
+
+## 6. 建议与下一步
 
 - 为 Champions 建立服务保障和新品优先触达，对 At Risk 采用分批召回；以增量实验而不是活动后自然波动评估效果。
 - 建立首购后 30/60/90 天自动化触达与 Cohort 看板，按获客月份追踪留存，避免只看累计复购率。
@@ -45,14 +49,16 @@
 - 针对海外头部市场补充履约成本、税费、交付时长后再评估扩张；本项目只有销售额，没有利润字段。
 - 后续如取得营销触达、流量、成本和库存数据，可增加漏斗、CAC/LTV、毛利与库存周转分析。
 
-## 6. 证据与可复现材料
+## 7. 证据与可复现材料
 
 - SQL 定义：[`sql/analysis.sql`](../sql/analysis.sql)
 - 交互式 Dashboard：[`dashboard/index.html`](../dashboard/index.html)
 - 数据质量审计：[`outputs/data_quality.json`](../outputs/data_quality.json)
 - 核心指标：[`outputs/kpis.json`](../outputs/kpis.json)
 - Cohort、RFM、市场和商品明细：[`outputs/`](../outputs/)
+- 实验可行性与分流预览：[`outputs/experiment_feasibility.csv`](../outputs/experiment_feasibility.csv)、[`outputs/experiment_assignment_preview.csv`](../outputs/experiment_assignment_preview.csv)
+- 实验注册表：[`experiments/experiment_registry.json`](../experiments/experiment_registry.json)
 
-## 7. 限制
+## 8. 限制
 
 这是公开历史交易数据的描述性分析。数据没有流量、营销触达、商品成本、库存、运费和取消原因，无法计算转化率、获客成本、真实利润，也不能把相关性写成因果结论。缺失客户编号的交易不进入 RFM/Cohort，客户相关结论只代表可识别客户。

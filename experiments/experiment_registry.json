@@ -1,0 +1,95 @@
+[
+  {
+    "experiment_id": "champions_protection",
+    "experiment_layer": "existing_customer",
+    "hypothesis": "优先服务和新品权益能提高 Champions 的 90 天购买留存率。",
+    "unit": "customer_id",
+    "arms": [
+      "control: existing service",
+      "treatment: priority service + early access"
+    ],
+    "randomization": "Within UK/international and monetary quartile strata, 1:1.",
+    "primary_metric": "90-day purchase retention",
+    "secondary_metrics": [
+      "90-day revenue per customer",
+      "order frequency"
+    ],
+    "guardrails": [
+      "cancellation rate",
+      "gross-margin proxy when cost is available",
+      "contact opt-out rate"
+    ],
+    "duration_days": 90,
+    "analysis": "Intent-to-treat; report absolute lift and 95% confidence interval."
+  },
+  {
+    "experiment_id": "at_risk_reactivation",
+    "experiment_layer": "existing_customer",
+    "hypothesis": "分三批发送差异化召回权益能提高 30 天重新购买率。",
+    "unit": "customer_id",
+    "arms": [
+      "control: no recall",
+      "treatment: recall, staggered across 3 weekly waves"
+    ],
+    "randomization": "Within recency band and frequency score strata, 1:1; treatment is split into 3 operational waves.",
+    "primary_metric": "30-day reactivation rate",
+    "secondary_metrics": [
+      "incremental revenue per assigned customer",
+      "coupon redemption"
+    ],
+    "guardrails": [
+      "unsubscribe rate",
+      "complaint rate",
+      "discount cost"
+    ],
+    "duration_days": 30,
+    "analysis": "Concurrent holdout remains untouched through all waves; do not compare waves to different calendar baselines."
+  },
+  {
+    "experiment_id": "new_customer_lifecycle",
+    "experiment_layer": "new_customer",
+    "hypothesis": "首购后 30/60/90 天节奏化内容能提高 90 天二次购买率。",
+    "unit": "customer_id",
+    "arms": [
+      "control: current onboarding",
+      "treatment: day 30/60/90 lifecycle journey"
+    ],
+    "randomization": "Within acquisition month and UK/international strata, 1:1 at first purchase.",
+    "primary_metric": "90-day second-purchase rate",
+    "secondary_metrics": [
+      "30-day repeat",
+      "60-day repeat",
+      "days to second order"
+    ],
+    "guardrails": [
+      "message opt-out",
+      "cancellation rate",
+      "contact frequency cap"
+    ],
+    "duration_days": 90,
+    "analysis": "Assign once at first purchase; evaluate by original assignment even if messages fail."
+  },
+  {
+    "experiment_id": "overseas_market_validation",
+    "experiment_layer": "existing_customer",
+    "hypothesis": "本地化商品与履约信息能提高具备足够客户基数的海外市场 90 天再次购买率。",
+    "unit": "customer_id",
+    "arms": [
+      "control: current storefront",
+      "treatment: localized merchandising + delivery message"
+    ],
+    "randomization": "Within each eligible country, 1:1; high-concentration markets remain measurement-only.",
+    "primary_metric": "90-day repeat purchase rate",
+    "secondary_metrics": [
+      "revenue per customer",
+      "orders per customer"
+    ],
+    "guardrails": [
+      "delivery lead time",
+      "cancellation rate",
+      "shipping subsidy per order"
+    ],
+    "duration_days": 90,
+    "analysis": "Country fixed effects; report pooled estimate and country-level heterogeneity only when adequately sized."
+  }
+]

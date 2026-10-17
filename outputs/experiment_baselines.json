@@ -1,0 +1,9 @@
+{
+  "snapshot_date": "2011-09-10",
+  "lifecycle_baselines": {
+    "repeat_30_rate": 0.18309859154929578,
+    "repeat_60_rate": 0.3299798792756539,
+    "repeat_90_rate": 0.4370221327967807
+  },
+  "disclaimer": "Historical baselines and simulated assignments only; no intervention was executed."
+}

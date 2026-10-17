@@ -21,7 +21,11 @@
     "sql_customers_reconciled": true,
     "all_customers_segmented": true,
     "cohort_month_zero_is_one": true,
-    "positive_sales_metrics": true
+    "positive_sales_metrics": true,
+    "four_experiments_registered": true,
+    "experiment_assignments_pseudonymized": true,
+    "experiment_power_inputs_valid": true,
+    "experiment_layers_mutually_exclusive": true
   },
   "all_checks_passed": true
 }

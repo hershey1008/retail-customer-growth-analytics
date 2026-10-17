@@ -39,6 +39,10 @@
     table { width:100%; border-collapse:separate; border-spacing:3px; font-size:12px; }
     th { color:var(--muted); font-weight:600; padding:6px; white-space:nowrap; }
     td { text-align:center; min-width:44px; padding:7px 5px; border-radius:4px; font-variant-numeric:tabular-nums; }
+    .experiment-table td:first-child, .experiment-table th:first-child { text-align:left; }
+    .status { display:inline-block; border-radius:999px; padding:3px 8px; font-size:11px; font-weight:700; }
+    .status.ready { background:#dff3e7; color:#24613c; }
+    .status.pilot { background:#fff0cf; color:#7a5310; }
     footer { color:var(--muted); margin-top:20px; font-size:13px; }
     a { color:var(--blue); }
     @media (max-width:900px) { .kpis {grid-template-columns:repeat(2,1fr)} .two {grid-template-columns:1fr} }
@@ -48,7 +52,7 @@
 <body>
   <header>
     <h1>Online Retail 客户价值与留存</h1>
-    <p>UCI 真实交易数据 · SQL + Python 清洗与核对 · RFM 客户分层 · Cohort 留存 · 海外市场与商品结构</p>
+    <p>UCI 真实交易数据 · SQL + Python 清洗与核对 · RFM 客户分层 · Cohort 留存 · 海外市场 · 实验可行性</p>
   </header>
   <main>
     <div class="notice">口径：销售毛额 = 数量 × 单价，排除取消单、非正数量和非正单价；2011-12 只有前 9 天，不与完整月份直接比较。</div>
@@ -74,6 +78,11 @@
     <section class="grid two">
       <article class="card"><h2>Top 海外市场</h2><div class="bars" id="countries"></div></article>
       <article class="card"><h2>Top 商品</h2><div class="bars" id="products"></div></article>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <div class="chart-head"><h2>后续实验可行性</h2><span class="subtle">历史基线与样本量规划，不是实验结果</span></div>
+      <div class="heatmap-wrap" id="experiments"></div>
+      <div class="subtle" id="lifecycle" style="margin-top:12px"></div>
     </section>
     <footer>数据源：Daqing Chen, UCI Online Retail, DOI 10.24432/C5BW33（CC BY 4.0）。本页为描述性分析，不代表因果结论；数据不含成本、库存、流量或营销触达。</footer>
   </main>
@@ -113,9 +122,15 @@
       c.rows.forEach((row,i)=>{html+=`<tr><th>${row}</th>`; c.columns.forEach((_,j)=>{const v=c.values[i][j]; if(v===null){html+='<td></td>'}else{const light=97-v*48; html+=`<td style="background:hsl(200 52% ${light}%);color:${v>.58?'white':'#17324d'}" title="${row}, M${j}: ${percent(v)}">${percent(v)}</td>`}}); html+='</tr>';});
       document.getElementById('cohort').innerHTML=html+'</tbody></table>';
     }
+    function renderExperiments(){
+      let html='<table class="experiment-table"><thead><tr><th>实验</th><th>历史基线</th><th>可用人群</th><th>+5pp 所需样本</th><th>状态</th></tr></thead><tbody>';
+      data.experiments.forEach(row=>{const ready=row.readiness==='powered_with_current_pool'; html+=`<tr><td>${row.experiment_name}</td><td>${percent(row.historical_baseline_rate)}</td><td>${integer(row.eligible_units)}</td><td>${integer(row.required_total_sample)}</td><td><span class="status ${ready?'ready':'pilot'}">${ready?'可检验':'仅试点'}</span></td></tr>`;});
+      document.getElementById('experiments').innerHTML=html+'</tbody></table>';
+      const b=data.lifecycleBaselines; document.getElementById('lifecycle').textContent=`历史自然二购率：30 天 ${percent(b.repeat_30_rate)} · 60 天 ${percent(b.repeat_60_rate)} · 90 天 ${percent(b.repeat_90_rate)}`;
+    }
     document.getElementById('metric').addEventListener('change',renderTrend);
     document.getElementById('segmentMetric').addEventListener('change',renderSegments);
-    renderTrend(); renderSegments(); renderCohort();
+    renderTrend(); renderSegments(); renderCohort(); renderExperiments();
     renderBars('countries',data.countries,'country','gross_revenue_gbp','money');
     renderBars('products',data.products,'description','gross_revenue_gbp','money');
   </script>

@@ -1,0 +1,5 @@
+experiment_id,experiment_name,primary_metric,historical_baseline_rate,eligible_units,target_absolute_lift,required_sample_per_arm,required_total_sample,achievable_mde,readiness
+champions_protection,Champions 保护,90 天购买留存率,0.8331466965285554,893,0.05,764,1528,0.06399638087293949,pilot_only_underpowered
+at_risk_reactivation,At Risk 分批召回,30 天重新购买率,0.22426470588235295,272,0.05,1174,2348,0.1552963619383978,pilot_only_underpowered
+new_customer_lifecycle,首购后 30/60/90 天运营,90 天二次购买率,0.4370221327967807,2485,0.05,1560,3120,0.05604773620158657,pilot_only_underpowered
+overseas_market_validation,海外头部市场验证,90 天再次购买率,0.5494505494505495,91,0.05,1534,3068,0.2708102513906618,pilot_only_underpowered

@@ -121,9 +121,15 @@ def create_sqlite_layer(frame: pd.DataFrame, database_path: Path, sql_path: Path
     }
 
 
-def score_rfm(customer_sales: pd.DataFrame) -> pd.DataFrame:
+def score_rfm(
+    customer_sales: pd.DataFrame,
+    snapshot_date: pd.Timestamp | None = None,
+) -> pd.DataFrame:
     """Build deterministic quintile RFM scores and business-readable segments."""
-    snapshot_date = customer_sales["invoice_date"].max().normalize() + pd.Timedelta(days=1)
+    if snapshot_date is None:
+        snapshot_date = customer_sales["invoice_date"].max().normalize() + pd.Timedelta(days=1)
+    else:
+        snapshot_date = pd.Timestamp(snapshot_date)
     rfm = (
         customer_sales.groupby("customer_id")
         .agg(
@@ -442,6 +448,8 @@ def build_dashboard(analysis: dict[str, Any], output_path: Path) -> None:
         "segments": analysis["segment_summary"].to_dict(orient="records"),
         "countries": analysis["country"].loc[lambda data: data["country"].ne("United Kingdom")].head(12).to_dict(orient="records"),
         "products": analysis["product"].head(12).to_dict(orient="records"),
+        "experiments": analysis["experiments"]["summary"].to_dict(orient="records"),
+        "lifecycleBaselines": analysis["experiments"]["lifecycle_baselines"],
         "cohort": {
             "rows": retention.index.tolist(),
             "columns": [int(column) for column in retention.columns],
@@ -500,7 +508,11 @@ def build_report(analysis: dict[str, Any], audit: dict[str, Any], output_path: P
 4. **海外收入仍是补充市场。** 非英国市场贡献 {metrics['non_uk_revenue_share']:.1%} 的有效销售额；其中 {top_country['country']} 以 £{top_country['gross_revenue_gbp']:,.0f} 位居海外市场首位。
 5. **头部行项目需要先做商品治理。** 收入最高行项目为 `{top_product['description']}`（£{top_product['gross_revenue_gbp']:,.0f}），但它是邮费编码而非实体商品；分析利润和备货前必须分离邮费、手工调整等服务型编码，并补充成本和库存数据。
 
-## 5. 建议与下一步
+## 5. 后续实验层
+
+项目已把建议扩展为四个可复现实验设计：Champions 保护、At Risk 分批召回、首购后 30/60/90 天运营和海外头部市场验证。使用 {analysis['experiments']['snapshot_date']} 时间切分估计自然基线、样本量与可检测提升，并生成哈希化模拟分流预览；**这些不是已执行实验或因果结果**。完整方案见 [`reports/experiment_plan.md`](experiment_plan.md)。
+
+## 6. 建议与下一步
 
 - 为 Champions 建立服务保障和新品优先触达，对 At Risk 采用分批召回；以增量实验而不是活动后自然波动评估效果。
 - 建立首购后 30/60/90 天自动化触达与 Cohort 看板，按获客月份追踪留存，避免只看累计复购率。
@@ -508,15 +520,17 @@ def build_report(analysis: dict[str, Any], audit: dict[str, Any], output_path: P
 - 针对海外头部市场补充履约成本、税费、交付时长后再评估扩张；本项目只有销售额，没有利润字段。
 - 后续如取得营销触达、流量、成本和库存数据，可增加漏斗、CAC/LTV、毛利与库存周转分析。
 
-## 6. 证据与可复现材料
+## 7. 证据与可复现材料
 
 - SQL 定义：[`sql/analysis.sql`](../sql/analysis.sql)
 - 交互式 Dashboard：[`dashboard/index.html`](../dashboard/index.html)
 - 数据质量审计：[`outputs/data_quality.json`](../outputs/data_quality.json)
 - 核心指标：[`outputs/kpis.json`](../outputs/kpis.json)
 - Cohort、RFM、市场和商品明细：[`outputs/`](../outputs/)
+- 实验可行性与分流预览：[`outputs/experiment_feasibility.csv`](../outputs/experiment_feasibility.csv)、[`outputs/experiment_assignment_preview.csv`](../outputs/experiment_assignment_preview.csv)
+- 实验注册表：[`experiments/experiment_registry.json`](../experiments/experiment_registry.json)
 
-## 7. 限制
+## 8. 限制
 
 这是公开历史交易数据的描述性分析。数据没有流量、营销触达、商品成本、库存、运费和取消原因，无法计算转化率、获客成本、真实利润，也不能把相关性写成因果结论。缺失客户编号的交易不进入 RFM/Cohort，客户相关结论只代表可识别客户。
 """
@@ -531,6 +545,9 @@ def run(input_path: Path = DEFAULT_INPUT) -> dict[str, Any]:
     raw = pd.read_excel(input_path, engine="openpyxl")
     frame, audit = prepare_transactions(raw)
     analysis = analyze(frame)
+    from src.experiments import design_experiments
+
+    analysis["experiments"] = design_experiments(analysis)
 
     sql_metrics = create_sqlite_layer(frame, ROOT / "build" / "online_retail.sqlite", ROOT / "sql" / "analysis.sql")
     metrics = analysis["metrics"]
@@ -543,6 +560,24 @@ def run(input_path: Path = DEFAULT_INPUT) -> dict[str, Any]:
         "all_customers_segmented": int(analysis["segment_summary"]["customers"].sum()) == metrics["identified_customers"],
         "cohort_month_zero_is_one": bool(np.allclose(analysis["cohort_retention"][0].dropna(), 1.0)),
         "positive_sales_metrics": metrics["gross_revenue_gbp"] > 0 and metrics["orders"] > 0,
+        "four_experiments_registered": len(analysis["experiments"]["registry"]) == 4,
+        "experiment_assignments_pseudonymized": bool(
+            analysis["experiments"]["assignments"]["subject_id"]
+            .astype(str)
+            .str.fullmatch(r"[0-9a-f]{12}")
+            .all()
+        ),
+        "experiment_power_inputs_valid": bool(
+            analysis["experiments"]["summary"]["required_total_sample"].gt(0).all()
+            and analysis["experiments"]["summary"]["historical_baseline_rate"]
+            .between(0, 1, inclusive="neither")
+            .all()
+        ),
+        "experiment_layers_mutually_exclusive": bool(
+            ~analysis["experiments"]["assignments"].duplicated(
+                ["experiment_layer", "subject_id"]
+            ).any()
+        ),
     }
     audit["validation_checks"] = checks
     audit["all_checks_passed"] = all(checks.values())
@@ -554,6 +589,17 @@ def run(input_path: Path = DEFAULT_INPUT) -> dict[str, Any]:
     (output_dir / "kpis.json").write_text(json.dumps(json_safe(metrics), indent=2, ensure_ascii=False), encoding="utf-8")
     (output_dir / "data_quality.json").write_text(json.dumps(json_safe(audit), indent=2, ensure_ascii=False), encoding="utf-8")
     save_charts(analysis, ROOT / "reports" / "figures")
+    from src.experiments import (
+        build_experiment_report,
+        save_experiment_charts,
+        save_experiment_outputs,
+    )
+
+    save_experiment_outputs(analysis["experiments"], ROOT)
+    save_experiment_charts(analysis["experiments"], ROOT / "reports" / "figures")
+    build_experiment_report(
+        analysis["experiments"], ROOT / "reports" / "experiment_plan.md"
+    )
     build_dashboard(analysis, ROOT / "dashboard" / "index.html")
     build_report(analysis, audit, ROOT / "reports" / "analysis_report.md")
     print(json.dumps(json_safe(metrics), indent=2, ensure_ascii=False))
