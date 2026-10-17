@@ -1,0 +1,19 @@
+{
+  "source_period_start": "2010-12-01",
+  "source_period_end": "2011-12-09",
+  "last_month_is_partial": true,
+  "gross_revenue_gbp": 10642110.804000001,
+  "identified_customer_revenue_gbp": 8887208.894000001,
+  "orders": 19960,
+  "identified_customers": 4338,
+  "avg_order_value_gbp": 533.1718839679359,
+  "units_sold": 5572420,
+  "repeat_customer_rate": 0.6558321807284463,
+  "cancelled_invoices": 3836,
+  "cancellation_value_gbp": 893979.73,
+  "identified_revenue_coverage": 0.8350983237892624,
+  "top_10pct_customer_revenue_share": 0.6145208192064804,
+  "non_uk_revenue_share": 0.15413922484094442,
+  "month_3_weighted_retention": 0.25636061946902655,
+  "month_6_weighted_retention": 0.2716216216216216
+}

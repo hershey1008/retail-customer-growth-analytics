@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Rebuilt locally from the public UCI source.
+data/raw/*
+!data/raw/.gitkeep
+build/
+
+# Local editor and operating-system files.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

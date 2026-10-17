@@ -1,0 +1,27 @@
+{
+  "source_rows": 541909,
+  "source_columns": 8,
+  "exact_duplicate_rows": 5268,
+  "missing_customer_id_rows": 135080,
+  "missing_description_rows": 1454,
+  "deduplicated_rows": 536641,
+  "rows_removed_as_exact_duplicates": 5268,
+  "cancelled_invoice_rows": 9251,
+  "nonpositive_quantity_rows": 10587,
+  "nonpositive_price_rows": 2512,
+  "valid_sales_rows": 524878,
+  "identified_customer_sales_rows": 392692,
+  "date_min": "2010-12-01T08:26:00",
+  "date_max": "2011-12-09T12:50:00",
+  "validation_checks": {
+    "expected_source_row_count": true,
+    "date_range_valid": true,
+    "sql_revenue_reconciled": true,
+    "sql_orders_reconciled": true,
+    "sql_customers_reconciled": true,
+    "all_customers_segmented": true,
+    "cohort_month_zero_is_one": true,
+    "positive_sales_metrics": true
+  },
+  "all_checks_passed": true
+}
